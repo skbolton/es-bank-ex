@@ -1,17 +1,47 @@
-import struct from '../struct'
+import { attributes } from 'structure'
 
-const Ledger = struct(
-  {
-    isFrozen: 'boolean',
-    frozenSince: 'datestr',
-    accountId: 'uuid',
-    balance: 'positiveNumber'
-  },
-  // defaults
-  {
-    isFrozen: false,
-    frozenSince: null
+class Ledger {
+  deposit(amount) {
+    this.balance += amount
+
+    return this
   }
-)
 
-export default Ledger
+  withdraw(amount) {
+    this.balance -= amount
+
+    return this
+  }
+
+  freeze() {
+    this.isFrozen = true
+    this.frozenSince = Date.now()
+
+    return this
+  }
+
+  sufficientFunds(amount = 0) {
+    return this.balance - amount >= 0
+  }
+}
+
+export default attributes({
+  id: {
+    type: String,
+    guid: true,
+    required: true
+  },
+  isFrozen: {
+    type: Boolean,
+    default: false
+  },
+  frozenSince: {
+    type: Number,
+    positive: true
+  },
+  balance: {
+    type: Number,
+    default: 0,
+    min: 0
+  }
+})(Ledger)

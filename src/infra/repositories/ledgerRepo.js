@@ -1,6 +1,5 @@
 import EvenTideEvent from '../eventide_event'
 import LedgerProjection from '../projections/ledger'
-import Ledger from '../../acme_bank/ledger/ledger'
 
 const createLedgerRepo = ({ messageStore, logger, stream }) => {
   /**
@@ -9,13 +8,15 @@ const createLedgerRepo = ({ messageStore, logger, stream }) => {
    *
    */
   const getForAccount = async accountId => {
-    const ledger = await messageStore.fetch(stream, LedgerProjection)
+    const entityStream = `${stream}-${accountId}`
+    console.log(entityStream)
+    const ledger = await messageStore.fetch(entityStream, LedgerProjection)
     // handle when the account doesn't actually exist
     if (!ledger.id) {
       return null
     }
     // validate the correct shape
-    return Ledger(ledger)
+    return ledger
   }
 
   /**
@@ -25,11 +26,24 @@ const createLedgerRepo = ({ messageStore, logger, stream }) => {
    *
    */
   const apply = async domainEvent => {
-    logger.info('validating eventide event')
-    const event = EvenTideEvent(domainEvent)
+    // TODO: find how to pass correlationId, causationId, and userId here
+    logger.info({
+      message: 'validating eventide event',
+      event: domainEvent.toJSON()
+    })
+    const event = new EvenTideEvent({
+      type: domainEvent.toString(),
+      metadata: {}
+    }).toJSON()
 
-    await messageStore.write(stream, event)
-    return messageStore.fetch(stream, LedgerProjection)
+    event.data = domainEvent.toJSON()
+
+    logger.info({ message: 'event tide event', event })
+
+    const entityStream = `${stream}-${domainEvent.accountId}`
+    console.log(entityStream)
+    await messageStore.write(entityStream, event)
+    return messageStore.fetch(entityStream, LedgerProjection)
   }
 
   return {

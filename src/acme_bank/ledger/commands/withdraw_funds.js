@@ -1,19 +1,24 @@
-import struct from '../../struct'
+import { attributes } from 'structure'
 
-const commandName = 'transact/withdraw-funds'
-const WithdrawFunds = struct(
-  {
-    // validate name in case caller tries to pass in
-    type: struct.literal(commandName),
-    accountId: 'uuid',
-    amount: 'positiveNumber'
-  },
-  {
-    // set default values
-    type: commandName
+class WithdrawFunds {
+  static toString() {
+    return 'acme-bank/withdraw-funds'
   }
-)
 
-WithdrawFunds.toString = () => commandName
+  toString() {
+    return WithdrawFunds.toString()
+  }
+}
 
-export default WithdrawFunds
+export default attributes({
+  accountId: {
+    type: String,
+    guid: true,
+    required: true
+  },
+  amount: {
+    type: Number,
+    min: 0,
+    required: true
+  }
+})(WithdrawFunds)

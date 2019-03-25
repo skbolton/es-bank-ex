@@ -1,8 +1,7 @@
-import Ledger from '../ledger'
 import WithdrawFunds from '../commands/withdraw_funds'
 import FundsWithdrawn from '../events/funds_withdrawn'
 import UnknownAccountError from '../errors/unknown_account'
-import OverdrawnError from '../errors/overdrawn'
+import InsufficientFundsError from '../errors/insufficient_funds'
 import FrozenAccountError from '../errors/frozen_account'
 
 /**
@@ -16,7 +15,11 @@ import FrozenAccountError from '../errors/frozen_account'
  */
 const createWithdrawHandler = ({ ledgerRepo }) => async command => {
   // 1.
-  const withdrawFunds = WithdrawFunds(command)
+  const withdrawFunds = new WithdrawFunds(command)
+  const { errors: commandErrors } = withdrawFunds.validate()
+  if (commandErrors.length) {
+    throw new Error('validation stuff')
+  }
   // 2.
   const { accountId, amount } = withdrawFunds
   const ledger = ledgerRepo.getForAccount(accountId)
@@ -33,17 +36,16 @@ const createWithdrawHandler = ({ ledgerRepo }) => async command => {
   }
 
   // 4.
-  try {
-    Ledger({
-      ...ledger,
-      balance: ledger.balance - amount
-    })
-  } catch (e) {
-    throw new OverdrawnError({ accountId, amount, balance: ledger.balance })
+  if (ledger.sufficientFunds(amount)) {
+    return ledgerRepo.apply(new FundsWithdrawn({ accountId, amount }))
   }
 
-  // ledger is valid apply change
-  return ledgerRepo.apply(FundsWithdrawn({ data: { accountId, amount } }))
+  // insufficent funds
+  throw new InsufficientFundsError({
+    accountId,
+    amount,
+    balance: ledger.balance
+  })
 }
 
 export default createWithdrawHandler

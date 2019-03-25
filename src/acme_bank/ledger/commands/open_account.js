@@ -1,15 +1,13 @@
-import struct from '../../struct'
-const commandName = 'transact/open-account'
+import { attributes } from 'structure'
 
-const OpenAccount = struct(
-  {
-    type: struct.literal(commandName)
-  },
-  {
-    type: commandName
+class OpenAccount {
+  static toString() {
+    return 'acme-bank/open-account'
   }
-)
 
-OpenAccount.toString = () => commandName
+  toString() {
+    return OpenAccount.toString()
+  }
+}
 
-export default OpenAccount
+export default attributes({})(OpenAccount)

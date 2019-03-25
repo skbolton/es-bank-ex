@@ -14,7 +14,9 @@ ledgerRouter.post('/:accountId', async (req, res) => {
 
   try {
     const depositFunds = req.scope.resolve('depositFunds')
-    const account = await depositFunds(DepositFunds({ amount, accountId }))
+    const account = await depositFunds(
+      new DepositFunds({ amount, accountId }).toJSON()
+    )
     return res.json({ account })
   } catch (e) {
     logger.error(e.message)
@@ -30,14 +32,23 @@ ledgerRouter.post('/', async (req, res) => {
 
   try {
     const openAccount = req.scope.resolve('openAccount')
-    const account = await openAccount(OpenAccount({}))
+    const account = await openAccount(new OpenAccount({}))
 
-    return res.json({ account })
+    return res.json({ account: account.toJSON() })
   } catch (e) {
-    logger.error(e.message)
+    console.log(e)
+    logger.error(e)
 
     return res.json({ error: 'whoops' })
   }
+})
+
+ledgerRouter.get('/', async (req, res) => {
+  const messageStore = req.scope.resolve('messageStore')
+
+  const messages = await messageStore.getStreamMessages('accounts')
+
+  return res.json({ messages })
 })
 
 export default ledgerRouter

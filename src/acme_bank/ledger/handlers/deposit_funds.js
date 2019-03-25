@@ -13,7 +13,15 @@ import FrozenAccountError from '../errors/frozen_account'
  */
 const createDepositHandler = ({ ledgerRepo }) => async command => {
   // 1.
-  const depositFunds = DepositFunds(command)
+  const depositFunds = new DepositFunds(command)
+  const validation = depositFunds.validate()
+  if (!validation.valid) {
+    console.log(validation.errors)
+    // TODO: add validation errors
+    throw new Error(
+      'Come back and find a way to consume a potential array of errors here'
+    )
+  }
   const { accountId, amount } = depositFunds
   // 2.
   const ledger = ledgerRepo.getForAccount(accountId)
@@ -27,7 +35,7 @@ const createDepositHandler = ({ ledgerRepo }) => async command => {
   }
 
   // looks good lets take their money!
-  return ledgerRepo.apply(FundsDeposited({ data: { accountId, amount } }))
+  return ledgerRepo.apply(new FundsDeposited({ accountId, amount }))
 }
 
 export default createDepositHandler

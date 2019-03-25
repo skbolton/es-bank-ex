@@ -1,40 +1,43 @@
-import struct from '../acme_bank/struct'
+import { attributes } from 'structure'
 import uuidV4 from 'uuid/v4'
 
-const EvenTideEvent = struct(
-  {
-    id: 'uuid',
-    time: 'number',
-    type: 'string',
-    metadata: {
-      // the causation is optional since the first command
-      // won't have one
-      causationId: 'uuid?',
-      correlationId: 'uuid?',
-      // this is also optional since not all events will
-      // have a user as the one who caused it to happen
-      userId: 'uuid?'
-    },
-    metadata: struct(
-      {
-        causationId: 'uuid?',
-        correlationId: 'uuid?',
-        userId: 'uuid?'
-      },
-      {
-        causationId: () => uuidV4(),
-        correlationId: () => uuidV4(),
-        userId: () => uuidV4()
-      }
-    ),
-    data: 'object'
+const MetaData = attributes({
+  correlationId: {
+    type: String,
+    guid: true,
+    default: ''
   },
-  // the defaults in case they aren't provided
-  {
-    id: () => uuidV4(),
-    time: () => Date.now(),
-    metadata: {}
+  causastionId: {
+    type: String,
+    guid: true,
+    default: ''
+  },
+  userId: {
+    type: String,
+    guid: true,
+    default: ''
   }
-)
+})(class EvenTideMetadata {})
 
-export default EvenTideEvent
+class EvenTideEvent {
+  toString() {
+    return this.type
+  }
+}
+
+export default attributes({
+  id: {
+    type: String,
+    guid: true,
+    default: () => uuidV4()
+  },
+  type: {
+    type: String,
+    required: true
+  },
+  time: {
+    type: Date,
+    default: () => Date.now()
+  },
+  metadata: MetaData
+})(EvenTideEvent)
