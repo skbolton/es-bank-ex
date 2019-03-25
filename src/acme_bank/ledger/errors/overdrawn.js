@@ -8,6 +8,7 @@ class OverdrawnError extends Error {
       amount,
       deniedResult: balance - amount
     }
+    // give a better error stack trace
     Error.captureStackTrace(this, OverdrawnError)
   }
 }

@@ -5,16 +5,16 @@ const commandName = 'transact/deposit-funds'
 const DepositFunds = struct(
   {
     // validate name in case caller tries to pass it in
-    command: struct.literal(commandName),
+    type: struct.literal(commandName),
     accountId: 'uuid',
     amount: 'positiveNumber'
   },
   {
     // set default values
-    command: commandName
+    type: commandName
   }
 )
 
-DepositFunds.commandName = commandName
+DepositFunds.toString = () => commandName
 
 export default DepositFunds

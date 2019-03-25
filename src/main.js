@@ -1,5 +1,11 @@
-// this file serves as the bundle point for our application
-// we create a container that has all our dependencies and
-// start up all parts of the application
+import awilix from 'awilix'
+import configureContainer from './configureContainer'
+import createServerModule from './clients/server/server'
 
+const DIContainer = configureContainer()
 
+const server = createServerModule(DIContainer)
+
+Promise.resolve(server.start())
+  .then(() => console.log('all things started'))
+  .catch(console.error)

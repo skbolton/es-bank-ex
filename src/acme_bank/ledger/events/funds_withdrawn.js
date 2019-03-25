@@ -21,6 +21,6 @@ const FundsWithdrawn = struct(
   }
 )
 
-FundsWithdrawn.eventName = eventName
+FundsWithdrawn.toString = () => eventName
 
 export default FundsWithdrawn

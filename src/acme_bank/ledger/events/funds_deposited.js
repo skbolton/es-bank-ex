@@ -19,6 +19,6 @@ const FundsDeposited = struct(
   }
 )
 
-FundsDeposited.eventName = eventName
+FundsDeposited.toString = () => eventName
 
 export default FundsDeposited
